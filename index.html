@@ -32,14 +32,53 @@
       scroll-behavior: smooth;
     }
 
+    /* ─── ANIMATED AURORA BACKGROUND ─── */
     body {
-      background: var(--bg);
       color: var(--text-primary);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
       font-size: 16px;
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Aurora gradient layer — fixed behind everything */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background: var(--bg);
+    }
+
+    #aurora-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 10%, rgba(0, 200, 150, 0.045) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 80%, rgba(0, 180, 140, 0.035) 0%, transparent 55%),
+        radial-gradient(ellipse 100% 60% at 50% 50%, rgba(0, 100, 80, 0.02) 0%, transparent 70%),
+        linear-gradient(170deg,
+          rgba(0,200,150,0.025) 0%,
+          transparent 30%,
+          rgba(0,160,120,0.02) 60%,
+          transparent 80%,
+          rgba(0,200,150,0.015) 100%
+        );
+      background-size: 300% 300%;
+      animation: aurora-shift 18s ease-in-out infinite alternate;
+      pointer-events: none;
+      will-change: background-position, opacity;
+    }
+
+    @keyframes aurora-shift {
+      0%   { background-position: 0% 0%, 100% 100%, 50% 50%, 0% 50%; opacity: 1; }
+      25%  { background-position: 30% 20%, 70% 80%, 60% 40%, 20% 60%; opacity: 0.85; }
+      50%  { background-position: 80% 60%, 20% 30%, 30% 70%, 60% 30%; opacity: 1; }
+      75%  { background-position: 50% 90%, 50% 10%, 70% 30%, 40% 70%; opacity: 0.9; }
+      100% { background-position: 100% 40%, 0% 60%, 50% 50%, 80% 20%; opacity: 1; }
     }
 
     /* ─── NAV ─── */
@@ -114,15 +153,37 @@
       overflow: hidden;
     }
 
+    /* Animated mesh/grid overlay — CSS only, no canvas */
     .hero-grid {
       position: absolute;
       inset: 0;
       background-image:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        linear-gradient(rgba(255,255,255,0.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.028) 1px, transparent 1px);
       background-size: 80px 80px;
       mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
       -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
+      animation: grid-breathe 6s ease-in-out infinite;
+      will-change: opacity;
+    }
+
+    @keyframes grid-breathe {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.35; }
+    }
+
+    /* Second offset grid layer for depth */
+    .hero-grid-2 {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,200,150,0.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,200,150,0.018) 1px, transparent 1px);
+      background-size: 240px 240px;
+      mask-image: radial-gradient(ellipse 70% 50% at 50% 40%, black 20%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 40%, black 20%, transparent 80%);
+      animation: grid-breathe 9s ease-in-out infinite reverse;
+      will-change: opacity;
     }
 
     .hero-glow {
@@ -132,8 +193,14 @@
       transform: translateX(-50%);
       width: 600px;
       height: 400px;
-      background: radial-gradient(ellipse at center, rgba(0, 200, 150, 0.08) 0%, transparent 70%);
+      background: radial-gradient(ellipse at center, rgba(0, 200, 150, 0.09) 0%, transparent 70%);
       pointer-events: none;
+      animation: glow-pulse 8s ease-in-out infinite;
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+      50%       { opacity: 0.6; transform: translateX(-50%) scale(1.08); }
     }
 
     .hero-inner {
@@ -514,46 +581,82 @@
       font-weight: 600;
     }
 
-    /* ─── HOW IT WORKS ─── */
+    /* ─── HOW IT WORKS — INTERACTIVE TABS ─── */
     #how {
       padding: 120px 0;
       border-top: 1px solid var(--border-subtle);
+      position: relative;
+      transition: background 0.6s ease;
+    }
+
+    #how.tab-bg-0 {
+      background: radial-gradient(ellipse 70% 60% at 20% 50%, rgba(0,200,150,0.045) 0%, transparent 60%);
+    }
+    #how.tab-bg-1 {
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(0,180,200,0.04) 0%, transparent 60%);
+    }
+    #how.tab-bg-2 {
+      background: radial-gradient(ellipse 70% 60% at 80% 50%, rgba(0,200,120,0.045) 0%, transparent 60%);
     }
 
     .how-header {
       text-align: center;
-      margin-bottom: 80px;
+      margin-bottom: 56px;
     }
 
-    .steps {
+    /* Tab nav — the 3 step buttons */
+    .steps-tabs {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 2px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      overflow: hidden;
       position: relative;
     }
 
-    .steps::before {
+    .steps-tabs::before {
       content: '';
       position: absolute;
-      top: 34px;
+      top: 50%;
       left: calc(16.66% + 16px);
       right: calc(16.66% + 16px);
       height: 1px;
       background: linear-gradient(90deg, var(--accent), rgba(0,200,150,0.2), var(--accent));
       z-index: 0;
+      opacity: 0.4;
+      transform: translateY(-50%);
     }
 
-    .step {
+    .step-tab {
+      background: var(--bg-card);
+      padding: 40px 28px 36px;
+      cursor: pointer;
       text-align: center;
-      padding: 48px 32px 40px;
       position: relative;
       z-index: 1;
+      transition: background 0.25s, box-shadow 0.25s;
+      border: none;
+      color: inherit;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
 
-    .step-number {
+    .step-tab:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .step-tab.active {
+      background: #0d1a16;
+      box-shadow: inset 0 -2px 0 var(--accent);
+    }
+
+    .step-tab .step-number {
       width: 48px;
       height: 48px;
-      background: var(--bg-card);
+      background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 50%;
       display: flex;
@@ -561,32 +664,186 @@
       justify-content: center;
       font-size: 15px;
       font-weight: 800;
-      color: var(--accent);
-      margin: 0 auto 28px;
-      position: relative;
-      z-index: 2;
-      transition: all 0.2s;
+      color: var(--text-muted);
+      margin: 0 auto 24px;
+      transition: all 0.3s;
     }
 
-    .step:hover .step-number {
+    .step-tab.active .step-number {
       background: var(--accent-dim);
       border-color: var(--accent);
+      color: var(--accent);
       box-shadow: 0 0 24px var(--accent-glow);
     }
 
-    .step h3 {
-      font-size: 18px;
+    .step-tab h3 {
+      font-size: 17px;
       font-weight: 700;
       letter-spacing: -0.4px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+      color: var(--text-muted);
+      transition: color 0.3s;
     }
 
-    .step p {
+    .step-tab.active h3 {
+      color: var(--text-primary);
+    }
+
+    .step-tab .step-teaser {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      transition: color 0.3s;
+    }
+
+    .step-tab.active .step-teaser {
+      color: var(--text-secondary);
+    }
+
+    /* Tab detail panel */
+    .steps-detail {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .step-panel {
+      display: none;
+      padding: 44px 48px;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .step-panel.active {
+      display: block;
+    }
+
+    .step-panel.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .step-panel-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: start;
+    }
+
+    .step-panel-text h4 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    .step-panel-text p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+
+    .step-bullets {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .step-bullets li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
       font-size: 14px;
       color: var(--text-secondary);
-      line-height: 1.65;
-      max-width: 240px;
-      margin: 0 auto;
+    }
+
+    .step-bullets li::before {
+      content: '→';
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 12px;
+      min-width: 18px;
+      margin-top: 2px;
+    }
+
+    .step-panel-highlight {
+      background: #0a1410;
+      border: 1px solid rgba(0,200,150,0.12);
+      border-radius: var(--radius);
+      padding: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-panel-highlight::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    }
+
+    .step-highlight-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .step-highlight-stat {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .step-highlight-stat .num {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      color: var(--text-primary);
+      line-height: 1;
+    }
+
+    .step-highlight-stat .unit {
+      font-size: 16px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .step-highlight-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .step-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .step-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(0,200,150,0.15);
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
     }
 
     /* ─── PRICING ─── */
@@ -848,35 +1105,37 @@
         gap: 48px;
       }
 
-      .steps {
+      .steps-tabs {
         grid-template-columns: 1fr;
-        gap: 0;
       }
 
-      .steps::before {
+      .steps-tabs::before {
         display: none;
       }
 
-      .step {
+      .step-tab {
         text-align: left;
-        padding: 32px 24px;
+        padding: 24px 20px;
         display: flex;
         align-items: flex-start;
-        gap: 20px;
+        gap: 16px;
       }
 
-      .step-number {
+      .step-tab .step-number {
         margin: 0;
         flex-shrink: 0;
       }
 
-      .step-content {
+      .step-tab-text {
         flex: 1;
       }
 
-      .step p {
-        max-width: 100%;
-        margin: 0;
+      .step-panel-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .step-panel {
+        padding: 28px 24px;
       }
 
       .pricing-grid {
@@ -957,6 +1216,9 @@
 </head>
 <body>
 
+  <!-- Aurora animated background layer -->
+  <div id="aurora-bg"></div>
+
   <!-- NAV -->
   <nav>
     <a href="#" class="nav-logo">aux<span>o</span></a>
@@ -966,6 +1228,7 @@
   <!-- HERO -->
   <section id="hero">
     <div class="hero-grid"></div>
+    <div class="hero-grid-2"></div>
     <div class="hero-glow"></div>
     <div class="hero-inner">
       <div class="hero-badge">Managed AI Automation</div>
@@ -1033,7 +1296,7 @@
           <p>It learns how you work. It speaks your brand voice. And it handles the repetitive stuff so you can focus on what actually requires you.</p>
           <ul class="solution-checklist">
             <li>Custom-built for your specific workflows</li>
-            <li>Fully managed — we handle setup, training & updates</li>
+            <li>Fully managed — we handle setup, training &amp; updates</li>
             <li>Responds to customers 24/7, not just 9–5</li>
             <li>Books appointments without lifting a finger</li>
             <li>Follows up on leads automatically</li>
@@ -1072,36 +1335,137 @@
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
-  <section id="how">
+  <!-- HOW IT WORKS — Interactive Tabs -->
+  <section id="how" class="tab-bg-0">
     <div class="container">
       <div class="how-header">
         <div class="section-label">How It Works</div>
         <h2>Up and running in days,<br>not months.</h2>
         <p class="section-sub">No IT department needed. No technical knowledge required. We handle everything.</p>
       </div>
-      <div class="steps">
-        <div class="step">
+
+      <!-- Tab nav -->
+      <div class="steps-tabs" role="tablist" aria-label="How it works steps">
+
+        <button class="step-tab active" role="tab" aria-selected="true" aria-controls="panel-0" data-tab="0">
           <div class="step-number">01</div>
-          <div class="step-content">
+          <div class="step-tab-text">
             <h3>Free audit call</h3>
-            <p>We map out your current workflow, find where time is leaking, and show you exactly what your AI assistant will handle.</p>
+            <p class="step-teaser">We map your workflow &amp; find the leaks.</p>
           </div>
-        </div>
-        <div class="step">
+        </button>
+
+        <button class="step-tab" role="tab" aria-selected="false" aria-controls="panel-1" data-tab="1">
           <div class="step-number">02</div>
-          <div class="step-content">
+          <div class="step-tab-text">
             <h3>We build &amp; configure</h3>
-            <p>Our team builds your custom assistant, trains it on your business, connects it to your tools, and tests everything before launch.</p>
+            <p class="step-teaser">Custom AI, trained on your business.</p>
           </div>
-        </div>
-        <div class="step">
+        </button>
+
+        <button class="step-tab" role="tab" aria-selected="false" aria-controls="panel-2" data-tab="2">
           <div class="step-number">03</div>
-          <div class="step-content">
+          <div class="step-tab-text">
             <h3>Go live &amp; we manage it</h3>
-            <p>Your assistant goes live. We monitor performance, make improvements, and handle any issues — every month, ongoing.</p>
+            <p class="step-teaser">Ongoing performance &amp; improvements.</p>
+          </div>
+        </button>
+
+      </div>
+
+      <!-- Tab panels -->
+      <div class="steps-detail">
+
+        <div class="step-panel active" id="panel-0" role="tabpanel">
+          <div class="step-panel-inner">
+            <div class="step-panel-text">
+              <h4>We start with your actual workflow</h4>
+              <p>In a free 20-minute call, we walk through exactly how your business operates — where inquiries come from, how you handle bookings, what eats your time every day.</p>
+              <p>You'll walk away with a clear picture of what your AI assistant will own, and what's off the table. No pressure, no pitch.</p>
+              <ul class="step-bullets">
+                <li>Identify your highest-leverage automation opportunities</li>
+                <li>Map your current tools and communication channels</li>
+                <li>Estimate time saved per week for your specific business</li>
+                <li>Get a custom automation plan — whether you hire us or not</li>
+              </ul>
+            </div>
+            <div class="step-panel-highlight">
+              <div class="step-highlight-label">What you get</div>
+              <div class="step-highlight-stat">
+                <span class="num">20</span>
+                <span class="unit">min</span>
+              </div>
+              <div class="step-highlight-desc">Free, zero-obligation audit call</div>
+              <div class="step-tags">
+                <span class="step-tag">Workflow mapping</span>
+                <span class="step-tag">Time audit</span>
+                <span class="step-tag">Custom plan</span>
+                <span class="step-tag">No sales pitch</span>
+              </div>
+            </div>
           </div>
         </div>
+
+        <div class="step-panel" id="panel-1" role="tabpanel">
+          <div class="step-panel-inner">
+            <div class="step-panel-text">
+              <h4>Built for your business, not a template</h4>
+              <p>Once you're onboard, our team gets to work. We build your AI assistant from scratch — trained on your FAQs, your tone of voice, your booking flow, your tools.</p>
+              <p>We connect it to your existing stack (calendar, CRM, forms) and run full QA before anything touches a real customer.</p>
+              <ul class="step-bullets">
+                <li>Custom AI trained on your content &amp; brand voice</li>
+                <li>Integrations with your calendar, CRM, and messaging tools</li>
+                <li>Full QA and test run before going live</li>
+                <li>Typical build time: 5–10 business days</li>
+              </ul>
+            </div>
+            <div class="step-panel-highlight">
+              <div class="step-highlight-label">Build timeline</div>
+              <div class="step-highlight-stat">
+                <span class="num">5</span>
+                <span class="unit">–10 days</span>
+              </div>
+              <div class="step-highlight-desc">From kickoff to live deployment</div>
+              <div class="step-tags">
+                <span class="step-tag">Custom build</span>
+                <span class="step-tag">Full QA</span>
+                <span class="step-tag">Integrations</span>
+                <span class="step-tag">Brand voice</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-panel" id="panel-2" role="tabpanel">
+          <div class="step-panel-inner">
+            <div class="step-panel-text">
+              <h4>We don't just launch it — we live in it</h4>
+              <p>Your AI assistant goes live and we stay on it. Every month we review performance, tune the responses, update integrations, and handle any edge cases that come up.</p>
+              <p>You get a monthly report showing what it handled, time saved, and leads captured. We handle the rest — you just run your business.</p>
+              <ul class="step-bullets">
+                <li>Monthly performance review &amp; optimization</li>
+                <li>Continuous training as your business evolves</li>
+                <li>Priority support when something needs fixing</li>
+                <li>Proactive suggestions for new automations</li>
+              </ul>
+            </div>
+            <div class="step-panel-highlight">
+              <div class="step-highlight-label">Average result</div>
+              <div class="step-highlight-stat">
+                <span class="num">20+</span>
+                <span class="unit">hrs/wk</span>
+              </div>
+              <div class="step-highlight-desc">Saved per business on average</div>
+              <div class="step-tags">
+                <span class="step-tag">Ongoing mgmt</span>
+                <span class="step-tag">Monthly report</span>
+                <span class="step-tag">Priority support</span>
+                <span class="step-tag">Always improving</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -1194,6 +1558,114 @@
     </div>
     <p class="footer-copy">© 2025 Auxo. All rights reserved.</p>
   </footer>
+
+  <script>
+    // ─── SCROLL PARALLAX ───
+    // Shifts the aurora background-position slightly as you scroll for depth
+    (function() {
+      var auroraBg = document.getElementById('aurora-bg');
+      var ticking = false;
+
+      function onScroll() {
+        if (!ticking) {
+          requestAnimationFrame(function() {
+            var scrollY = window.scrollY || window.pageYOffset;
+            var maxScroll = document.body.scrollHeight - window.innerHeight;
+            var progress = maxScroll > 0 ? scrollY / maxScroll : 0;
+
+            // Gently shift background-position based on scroll
+            var shiftX = progress * 30; // 0 → 30%
+            var shiftY = progress * 20; // 0 → 20%
+
+            auroraBg.style.transform = 'translate(' + (-shiftX * 0.4) + 'px, ' + (-shiftY * 0.4) + 'px) scale(1.05)';
+            auroraBg.style.opacity = 0.85 + (Math.sin(progress * Math.PI) * 0.15);
+
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+
+    // ─── HOW IT WORKS — INTERACTIVE TABS ───
+    (function() {
+      var tabs = document.querySelectorAll('.step-tab');
+      var panels = document.querySelectorAll('.step-panel');
+      var howSection = document.getElementById('how');
+      var bgClasses = ['tab-bg-0', 'tab-bg-1', 'tab-bg-2'];
+
+      function activateTab(index) {
+        // Update tabs
+        tabs.forEach(function(tab, i) {
+          tab.classList.toggle('active', i === index);
+          tab.setAttribute('aria-selected', i === index ? 'true' : 'false');
+        });
+
+        // Hide all panels (remove visible first for transition)
+        panels.forEach(function(panel) {
+          panel.classList.remove('visible');
+        });
+
+        // Swap active panel after a brief delay for smooth transition
+        setTimeout(function() {
+          panels.forEach(function(panel, i) {
+            panel.classList.toggle('active', i === index);
+          });
+
+          // Trigger reflow then add visible
+          requestAnimationFrame(function() {
+            requestAnimationFrame(function() {
+              var activePanel = panels[index];
+              if (activePanel) {
+                activePanel.classList.add('visible');
+              }
+            });
+          });
+        }, 60);
+
+        // Swap section background gradient
+        bgClasses.forEach(function(cls) {
+          howSection.classList.remove(cls);
+        });
+        howSection.classList.add(bgClasses[index]);
+      }
+
+      // Attach click listeners
+      tabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          var index = parseInt(this.getAttribute('data-tab'), 10);
+          activateTab(index);
+        });
+      });
+
+      // Activate first tab on load (trigger visible class)
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          var firstPanel = panels[0];
+          if (firstPanel) firstPanel.classList.add('visible');
+        });
+      });
+
+      // Keyboard navigation
+      tabs.forEach(function(tab, index) {
+        tab.addEventListener('keydown', function(e) {
+          if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            var next = (index + 1) % tabs.length;
+            tabs[next].focus();
+            activateTab(next);
+          } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+            e.preventDefault();
+            var prev = (index - 1 + tabs.length) % tabs.length;
+            tabs[prev].focus();
+            activateTab(prev);
+          }
+        });
+      });
+    })();
+  </script>
 
 </body>
 </html>
